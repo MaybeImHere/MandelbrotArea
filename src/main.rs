@@ -1,6 +1,5 @@
 use rand;
 use ctrlc;
-use num_bigfloat;
 
 use std::{thread, time};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -28,14 +27,6 @@ impl Point {
             x: 0.0,
             y: 0.0
         }
-    }
-    
-    // returns the distance from one point to another.
-    fn dist(&self, p2: Point) -> f64 {
-        let a = self.x - p2.x;
-        let b = self.y - p2.y;
-        
-        (a * a + b * b).sqrt()
     }
     
     // returns the distance of the point to the origin.
@@ -125,9 +116,7 @@ const FOURPI: f64 = 4.0 * 3.141592653589793238462643383279502;
 
 fn main() {
     // section for setting up ctrl c handler.
-    let (tx_running, rx_running) = mpsc::channel();
-    
-    let mut tried_exiting = Arc::new(AtomicBool::new(false));
+    let tried_exiting = Arc::new(AtomicBool::new(false));
     
     let ctrlc_tried_exiting = Arc::clone(&tried_exiting);
     ctrlc::set_handler(move || {
@@ -139,7 +128,6 @@ fn main() {
         }
         
         println!("Ending program.");
-        tx_running.send(()).expect("Couldn't send stop signal!"); 
     }).expect("Error setting Ctrl-C handler.");
     
     // the part to calculate points.
@@ -165,7 +153,6 @@ fn main() {
     // for counting number of threads.
     let mut threads_temp = threads;
     while threads_temp > 0 {
-        let tried_exiting_ref = Arc::clone(&tried_exiting);
         let tx_clone = tx_main.clone();
         
         let (tx_exiting, rx_exiting) = mpsc::channel();
@@ -206,10 +193,10 @@ fn main() {
    
     // -- Data Collection --
     let data_col_tried_exiting = Arc::clone(&tried_exiting);
-   
     
     let mut start = time::Instant::now();
     loop {
+        // calculate if we should print the area.
         let area = FOURPI * (in_set as f64) / (total as f64);
         if start.elapsed().as_secs() > 1 && area != last_area && !area.is_nan() {
             start = time::Instant::now();
@@ -217,6 +204,7 @@ fn main() {
             last_area = area;
         }
         
+        // if tried_exiting is true, we want to begin the exit process.
         if data_col_tried_exiting.load(Ordering::SeqCst) {
             for thread_exit_channel in thread_exit_channels.iter() {
                 thread_exit_channel.send(()).expect("Could not send exit signal to child threads!");

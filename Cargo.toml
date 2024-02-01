@@ -13,5 +13,4 @@ opt-level = 3
 
 [dependencies]
 ctrlc = "3.4.2"
-num-bigfloat = "1.7.0"
 rand = "0.8.5"
