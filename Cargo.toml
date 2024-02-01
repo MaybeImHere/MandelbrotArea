@@ -1,0 +1,17 @@
+[package]
+name = "mandel-area"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+ctrlc = "3.4.2"
+num-bigfloat = "1.7.0"
+rand = "0.8.5"
