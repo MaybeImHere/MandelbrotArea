@@ -85,7 +85,7 @@ impl Point {
             z.complex_square().complex_add(self);
             
             // escape condition.
-            if z.x * z.x + z.y + z.y > 4.0 {
+            if z.x * z.x + z.y * z.y > 4.0 {
                 return false;
             }
             
